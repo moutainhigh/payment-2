@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+        	
+	<dubbo:application name="${dubbo.application.name}" owner="${dubbo.application.owner}" />
+	
+	<dubbo:registry address="${dubbo.registry.address}" />
+	 
+	<dubbo:protocol name="dubbo" port="${dubbo.protocol.port}" />
+	
+	
+	<dubbo:service interface="com.jutou.payment.remote.MmpaysptransRemote" ref="mmpaysptransRemoteImpl" version="1.0.1" timeout="30000"/>
+	
+	<dubbo:service interface="com.jutou.payment.remote.PaymentRemote" ref="paymentRemoteImpl" version="1.0.1" timeout="30000"/>
+	
+	<dubbo:service interface="com.jutou.payment.remote.RedPackRemote" ref="redPackRemoteImpl" version="1.0.1" timeout="30000"/>
+	
+	
+</beans>

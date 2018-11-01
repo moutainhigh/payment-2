@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jutou.payment.mapper.PayTrackMapper">
+	<resultMap id="BaseResultMap" type="com.jutou.payment.model.PayTrack">
+		<id column="ID" property="id" />
+		<result column="ORDER_ID" property="orderId" />
+		<result column="CHANNEL_CODE" property="channelCode" />
+		<result column="URL_CONTENT" property="urlContent" />
+		<result column="CALLBACK_CONTENT" property="callbackContent" />
+		<result column="TRADEID" property="tradeId" />
+		<result column="PAY_ACCOUNT" property="payAccount"/>
+		<result column="STATUS" property="status" />
+		<result column="CREATED_BY" property="createdBy" />
+		<result column="CREATED_DATE" property="createdDate" />
+		<result column="UPDATED_BY" property="updatedBy" />
+		<result column="UPDATED_DATE" property="updatedDate" />
+		<result column="DELETED_FLAG" property="deletedFlag" />
+	</resultMap>
+
+	<sql id="Base_Column_List">
+		ID, ORDER_ID, CHANNEL_CODE, URL_CONTENT, CALLBACK_CONTENT, TRADEID, STATUS, PAY_ACCOUNT,
+		CREATED_BY, CREATED_DATE, UPDATED_BY, UPDATED_DATE, DELETED_FLAG
+	</sql>
+
+	<select id="load" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT * FROM aa_pay_track WHERE ORDER_ID = #{orderId}
+	</select>
+	
+	<select id="loadByTradeId" resultMap="BaseResultMap" parameterType="java.lang.String">
+		SELECT * FROM aa_pay_track WHERE TRADEID = #{tradeId}
+	</select>
+	
+	<insert id="add" parameterType="com.jutou.payment.model.PayTrack">
+		<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS ID
+		</selectKey>
+		INSERT INTO aa_pay_track(
+		<include refid="Base_Column_List"></include>
+		) VALUES (#{id},#{orderId},#{channelCode},#{urlContent},#{callbackContent},#{tradeId}, #{status}, #{payAccount}, #{createdBy}, now(),#{updatedBy}, now(), 'N');
+	</insert>
+
+	<update id="merge" parameterType="com.jutou.payment.model.PayTrack">
+		UPDATE aa_pay_track SET UPDATED_DATE = now() , STATUS = #{status}
+		<if test="urlContent != null and urlContent != ''">
+			,URL_CONTENT = #{urlContent}
+		</if>
+		<if test="callbackContent != null and callbackContent != ''">
+			,CALLBACK_CONTENT = #{callbackContent}
+		</if>
+		<if test="channelCode != null and channelCode != ''">
+			,CHANNEL_CODE = #{channelCode}
+		</if>
+		<if test="tradeId != null and tradeId != ''">
+			,TRADEID = #{tradeId}
+		</if>
+		<if test="reason != null and reason != ''">
+			,REASON = #{reason}
+		</if>
+		WHERE ORDER_ID = #{orderId}
+	</update>
+
+	<select id="search" resultMap="BaseResultMap" parameterType="com.jutou.payment.model.PayTrack">
+		SELECT
+		<include refid="Base_Column_List" />
+		FROM aa_pay_track
+		<where>
+			<if test="channelCode != null and channelCode != ''">
+				AND CHANNEL_CODE = #{channelCode}
+			</if>
+			<if test="status != null and status != ''">
+				AND STATUS = #{status}
+			</if>
+		</where>
+	</select>
+
+	<update id="mergeExpired" parameterType="java.lang.Long">
+	<![CDATA[
+		UPDATE aa_pay_track
+		SET STATUS = 'TO', UPDATED_DATE = NOW()
+		WHERE CREATED_DATE <= DATE_ADD(NOW(), INTERVAL -#{minutes} MINUTE) 
+		AND STATUS = 'WP'
+	]]>
+	</update>
+</mapper>
